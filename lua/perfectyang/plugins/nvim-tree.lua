@@ -26,19 +26,19 @@ return {
       reload_on_bufenter = true,
       on_attach = my_on_attach,
       -- change folder arrow icons
-      renderer = {
-        indent_markers = {
-          enable = true,
-        },
-        icons = {
-          glyphs = {
-            folder = {
-              arrow_closed = "", -- arrow when folder is closed
-              arrow_open = "", -- arrow when folder is open
-            },
-          },
-        },
-      },
+      -- renderer = {
+      --   indent_markers = {
+      --     enable = true,
+      --   },
+      --   icons = {
+      --     glyphs = {
+      --       folder = {
+      --         -- arrow_closed = "", -- arrow when folder is closed
+      --         -- arrow_open = "", -- arrow when folder is open
+      --       },
+      --     },
+      --   },
+      -- },
 
       actions = {
         open_file = {
