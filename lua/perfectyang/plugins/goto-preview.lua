@@ -35,12 +35,6 @@ return {
     })
 
     vim.keymap.set("n", "gd", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })
-    -- vim.keymap.set(
-    --   "n",
-    --   "glt",
-    --   "<cmd>lua require('goto-preview').goto_preview_type_definition()<CR>",
-    --   { noremap = true }
-    -- )
     vim.keymap.set("n", "gpr", "<cmd>lua require('goto-preview').goto_preview_references()<CR>", { noremap = true })
     vim.keymap.set("n", "gsc", "<cmd>lua require('goto-preview').close_all_win()<CR>", { noremap = true })
     vim.keymap.set("n", "gn", "<cmd>lua require('goto-preview').go_next_win()<CR>", { noremap = true })

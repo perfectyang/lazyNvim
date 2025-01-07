@@ -16,7 +16,7 @@ return {
 
       require("telescope.pickers")
         .new({}, {
-          prompt_title = "Harpoon",
+          prompt_title = "harpoon",
           finder = require("telescope.finders").new_table({
             results = file_paths,
           }),
