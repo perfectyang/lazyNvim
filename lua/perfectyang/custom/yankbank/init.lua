@@ -23,8 +23,8 @@ local default_opts = {
   keymaps = {
     paste = "<CR>",
     paste_back = "P",
-    navigation_next = "<c-n>",
-    navigation_prev = "<c-p>",
+    navigation_next = "J",
+    navigation_prev = "K",
   },
   persist_type = "sqlite",
   db_path = vim.fn.expand("~/.local/share/pnvim/databases"),
