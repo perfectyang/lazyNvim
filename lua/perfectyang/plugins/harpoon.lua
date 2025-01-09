@@ -13,7 +13,7 @@ return {
       for _, item in ipairs(harpoon_files.items) do
         table.insert(file_paths, item.value)
       end
-
+      -- open the picker
       require("telescope.pickers")
         .new({}, {
           prompt_title = "harpoon",

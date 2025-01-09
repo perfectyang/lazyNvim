@@ -11,7 +11,13 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({ { import = "perfectyang.plugins" }, { import = "perfectyang.plugins.lsp" } }, {
+require("lazy").setup({
+  { import = "perfectyang.plugins" },
+  { import = "perfectyang.plugins.lsp" },
+  { import = "perfectyang.plugins.viewRegister" },
+  { import = "perfectyang.custom.yankbank.init" },
+}, {
+
   checker = {
     enabled = true,
     notify = false,
