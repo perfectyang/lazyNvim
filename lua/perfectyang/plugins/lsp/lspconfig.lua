@@ -75,7 +75,7 @@ return {
 
       -- set keybinds
       keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
-      keymap.set("n", "gl", "<cmd>Telescope lsp_definitions<CR>", opts) -- see definition and make edits in window
+      keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- see definition and make edits in window
       keymap.set("n", "gh", vim.lsp.buf.code_action, opts) -- see available code actions
       keymap.set({ "n", "v" }, "gh", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
     end
