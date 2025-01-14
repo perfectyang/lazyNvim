@@ -14,7 +14,7 @@ local persistence = require("perfectyang.custom.yankbank.persistence")
 -- default plugin options
 local default_opts = {
   max_entries = 100,
-  sep = "   ",
+  sep = "",
   focus_gain_poll = true,
   num_behavior = "jump",
   registers = {
