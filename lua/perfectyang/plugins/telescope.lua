@@ -65,8 +65,8 @@ return {
 
     -- set keymaps
 
-    vim.keymap.set({ "n", "t", "i" }, "<leader>fc", f_live_grep)
-    vim.keymap.set({ "n", "t", "i" }, "<leader>ff", f_find_files)
+    vim.keymap.set({ "n", "t", "i" }, "<leader>fc", f_live_grep, { desc = "全局查找字符串" })
+    vim.keymap.set({ "n", "t", "i" }, "<leader>ff", f_find_files, { desc = "全局查找文件" })
 
     -- keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
     -- keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })

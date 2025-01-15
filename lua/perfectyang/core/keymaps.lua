@@ -18,26 +18,6 @@ G.floaterm_opener = "edit"
 -- ---------- 插入模式 ---------- ---
 keymap.set("i", "jj", "<ESC>")
 
-keymap.set("n", "j", function(...)
-  local count = vim.v.count
-
-  if count == 0 then
-    return "gj"
-  else
-    return "j"
-  end
-end, { expr = true })
-
-keymap.set("n", "k", function(...)
-  local count = vim.v.count
-
-  if count == 0 then
-    return "gk"
-  else
-    return "k"
-  end
-end, { expr = true })
-
 -- ---------- 视觉模式 ---------- ---
 -- 单行或多行移动
 -- keymap.set("v", "J", ":m '>+1<CR>gv=gv")
