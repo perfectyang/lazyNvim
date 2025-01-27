@@ -17,13 +17,25 @@ return {
   },
   config = function()
     local cmp = require("cmp")
-
     local luasnip = require("luasnip")
 
     local lspkind = require("lspkind")
 
     -- loads vscode style snippets from installed plugins (e.g. friendly-snippets)
     require("luasnip.loaders.from_vscode").lazy_load()
+    require("luasnip.loaders.from_vscode").lazy_load({ paths = "~/.config/pnvim/lua/perfectyang/snippets" })
+
+    -- local s = luasnip.snippet
+    -- local t = luasnip.text_node
+    -- local i = luasnip.insert_node
+    -- luasnip.add_snippets("lua", {
+    --   s("hello", {
+    --     t("print('hello word')"),
+    --   }),
+    -- })
+    -- for _, ft_path in ipairs(vim.api.nvim_get_runtime_file("lua/perfectyang/snippets/*.lua", true)) do
+    --   loadfile(ft_path)()
+    -- end
 
     cmp.setup({
       completion = {

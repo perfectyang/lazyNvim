@@ -78,6 +78,7 @@ return {
       keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- see definition and make edits in window
       keymap.set("n", "gh", vim.lsp.buf.code_action, opts) -- see available code actions
       keymap.set({ "n", "v" }, "gh", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
+      -- lspconfig["ts_ls"].setup({})
     end
 
     -- Change the Diagnostic symbols in the sign column (gutter)

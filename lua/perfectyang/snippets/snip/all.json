@@ -1,0 +1,26 @@
+{
+  "fakeAsync": {
+    "prefix": "fakeAsync",
+    "body": [
+      "const fakeAsync = () => {",
+      "  return new Promise((resolve, reject) => {",
+      "    setTimeout(() => {",
+      "      resolve([]);",
+      "    }, 1000);",
+      "  });",
+      "};",
+      ""
+    ],
+    "description": "fakeAsync"
+  },
+  "fa": {
+    "prefix": "fa",
+    "body": ["const $1 = () => {", "  ", "}", ""],
+    "description": "fa"
+  },
+  "fma": {
+    "prefix": "fma",
+    "body": ["const $1 = useMemoizedFn(() => {", "  ", "});", ""],
+    "description": "fma"
+  }
+}

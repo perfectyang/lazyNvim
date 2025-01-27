@@ -10,7 +10,7 @@ local default_keymaps = {
   paste = "<CR>",
   paste_back = "P",
   yank = "yy",
-  close = { "<Esc>", "<C-c>", "q", "<leader>sc" },
+  close = { "<Esc>", "q", "<leader>sc" },
 }
 
 -- define default yank register
@@ -42,7 +42,7 @@ end
 function M.create_and_fill_buffer()
   -- stop if yanks or register types table is empty
   if #YB_YANKS == 0 or #YB_REG_TYPES == 0 then
-    print("No yanks to show.")
+    print(">>>>perfectyang, nothing to show !!!!!!!!!!")
     return nil
   end
 

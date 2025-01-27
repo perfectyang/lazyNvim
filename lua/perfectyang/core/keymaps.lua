@@ -38,6 +38,7 @@ keymap.set("n", "L", "$")
 keymap.set("n", "daf", "va{Vd")
 keymap.set("n", "yaf", "va{Vy")
 keymap.set("n", "yp", "Yp")
+keymap.set("n", "Q", ":q!<CR>")
 
 -- 标记可以不同文件夹之前跳转
 local alp = {
