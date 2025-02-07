@@ -11,16 +11,43 @@
       "};",
       ""
     ],
-    "description": "fakeAsync"
+    "description": "模拟异步"
   },
   "fa": {
     "prefix": "fa",
     "body": ["const $1 = () => {", "  ", "}", ""],
-    "description": "fa"
+    "description": "箭头函数"
   },
-  "fma": {
-    "prefix": "fma",
-    "body": ["const $1 = useMemoizedFn(() => {", "  ", "});", ""],
-    "description": "fma"
+  "fam": {
+    "prefix": "fam",
+    "body": ["const $1 = useMemoizedFn(() => {", "  ", "})", ""],
+    "description": "缓存箭头函数"
+  },
+  "del": {
+    "prefix": "del",
+    "body": [
+      "{hasAuthCode(\"dms:saleSystem:consignmentSettlement:delete\") && (",
+      "    <RenderConfirm",
+      "      okButtonProps={{",
+      "        type: \"text\",",
+      "        size: \"mini\",",
+      "        style: { padding: \"0px\", fontSize: 12, color: \"red\" },",
+      "      }}",
+      "      popconfirmProps={{",
+      "        title: ts(\"确定要删除?\"),",
+      "      }}",
+      "      okText={ts(\"删除\")}",
+      "      onOk={async () => {",
+      "        return dicts.deleteRow(item);",
+      "      }}",
+      "    />",
+      ")}"
+    ],
+    "description": "删除提示组件"
+  },
+  "auth": {
+    "prefix": "th",
+    "body": ["hasAuthCode('$1')"],
+    "description": "权限"
   }
 }

@@ -2,6 +2,6 @@
   "memo": {
     "prefix": "me",
     "body": ["const $1 = useMemo(() => {$2}, [])"],
-    "description": "memo"
+    "description": "杨大帅哥自定义memo"
   }
 }

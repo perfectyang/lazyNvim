@@ -8,7 +8,6 @@ local max_entries = 10
 
 ---@class YankBankDB:sqlite_db
 ---@field bank sqlite_tbl
----@field bank sqlite_tbl
 local db = sqlite({
   uri = dbdir .. "/yankbank.db",
   bank = {

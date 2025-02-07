@@ -42,7 +42,7 @@ end
 function M.create_and_fill_buffer()
   -- stop if yanks or register types table is empty
   if #YB_YANKS == 0 or #YB_REG_TYPES == 0 then
-    print(">>>>perfectyang, nothing to show !!!!!!!!!!")
+    print(">>>> 杨大帅哥, nothing to show OOOOO!!!!!!!!!!")
     return nil
   end
 
