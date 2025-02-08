@@ -27,6 +27,10 @@ function M.get_project_branch_buffer()
     local bufnr = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_name(bufnr, "GitNotes: " .. project_branch_id)
 
+    -- set buffer type same as current window for syntax highlighting
+    -- local current_filetype = vim.bo.filetype
+    -- vim.api.nvim_set_option_value("filetype", current_filetype, { buf = bufnr })
+
     vim.api.nvim_buf_set_option(bufnr, "buftype", "acwrite")
     vim.api.nvim_buf_set_option(bufnr, "bufhidden", "hide")
 
@@ -47,14 +51,17 @@ end
 
 function M.save_buffer_content(bufnr, project_branch_id)
   local content = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  local file_path = vim.fn.expand("~/.vim/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
+
+  local file_path =
+    vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
   vim.fn.mkdir(vim.fn.fnamemodify(file_path, ":h"), "p")
   vim.fn.writefile(content, file_path)
   vim.api.nvim_buf_set_option(bufnr, "modified", false)
 end
 
 function M.load_buffer_content(bufnr, project_branch_id)
-  local file_path = vim.fn.expand("~/.vim/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
+  local file_path =
+    vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
   if vim.fn.filereadable(file_path) == 1 then
     local content = vim.fn.readfile(file_path)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, content)
@@ -82,6 +89,7 @@ function M.create_float_win(bufnr)
   vim.api.nvim_win_set_option(M.float_win, "relativenumber", true)
   vim.api.nvim_buf_set_option(bufnr, "buftype", "acwrite")
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "hide")
+  -- vim.api.nvim_set_option_value("filetype", vim.bo.filetype, { buf = bufnr })
 
   vim.api.nvim_buf_set_keymap(
     bufnr,
@@ -127,7 +135,8 @@ function M.cleanup_deleted_branches()
         vim.api.nvim_buf_delete(bufnr, { force = true })
       end
 
-      local file_path = vim.fn.expand("~/.vim/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
+      local file_path =
+        vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
       if vim.fn.filereadable(file_path) == 1 then
         vim.fn.delete(file_path)
       end
