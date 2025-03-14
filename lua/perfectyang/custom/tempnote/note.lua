@@ -1,5 +1,7 @@
 local M = {}
 
+local db = require("perfectyang.custom.tempnote.db")
+
 M.project_branch_buffers = {}
 M.float_win = nil
 
@@ -52,6 +54,8 @@ end
 function M.save_buffer_content(bufnr, project_branch_id)
   local content = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
+  -- db.add_note(project_branch_id, table.concat(content, "\n"))
+
   local file_path =
     vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
   vim.fn.mkdir(vim.fn.fnamemodify(file_path, ":h"), "p")
@@ -65,8 +69,11 @@ function M.load_buffer_content(bufnr, project_branch_id)
   if vim.fn.filereadable(file_path) == 1 then
     local content = vim.fn.readfile(file_path)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, content)
-    vim.api.nvim_buf_set_option(bufnr, "modified", false)
   end
+  -- local content = db.select_data(project_branch_id)
+  -- local map = {}
+  -- table.insert(map, content)
+  vim.api.nvim_buf_set_option(bufnr, "modified", false)
 end
 
 function M.create_float_win(bufnr)

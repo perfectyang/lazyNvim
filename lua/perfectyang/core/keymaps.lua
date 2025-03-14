@@ -75,8 +75,9 @@ local function getSetMark(list)
     keymap.set("n", "`" .. value, "`" .. string.upper(value))
   end
 end
-getSetMark(alp)
+-- getSetMark(alp)
 -- Move Lines
+
 
 keymap.set("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
 keymap.set("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
