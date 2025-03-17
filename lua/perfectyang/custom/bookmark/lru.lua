@@ -22,8 +22,10 @@ function LRUCache:logState()
   print(state)
 end
 
-function LRUCache:restIndex()
-  -- self.index = #self.order
+function LRUCache:initConfig()
+  self.cache = {}
+  self.order = {}
+  self.index = 0
 end
 
 function LRUCache:goNext()
@@ -57,6 +59,8 @@ function LRUCache:setIndexFormMark(mark)
   for index, key in ipairs(self.order) do
     if mark == key then
       self.index = index
+      print("找到" .. mark .. "的索引" .. index)
+      break
     end
   end
 end

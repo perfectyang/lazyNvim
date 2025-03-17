@@ -1,165 +1,144 @@
-local LRU = require("perfectyang.custom.bookmark.lru")
-local lru = LRU.new(26)
+local utils = require("perfectyang.custom.bookmark.utils")
 local M = {}
+-- 存储标记的表
+local named_marks = {}
+-- 当前标记的索引
+local current_mark_index = 0
 
-local self_next_mark = string.byte("A")
-
-function M.is_uppercase_mark(mark)
-  return mark:match("^[A-Z]$") ~= nil
+-- 设置命名标记
+local function set_named_mark()
+  local new_mark = {
+    id = #named_marks + 1,
+    file = vim.fn.expand("%:p"),
+    line = vim.fn.line("."),
+    col = vim.fn.col("."),
+  }
+  table.insert(named_marks, new_mark)
+  current_mark_index = #named_marks
+  M.save_marks()
+  -- print(string.format("标记设置: %d at %s:%d:%d", new_mark.id, new_mark.file, new_mark.line, new_mark.col))
 end
 
--- function M.findMarkPos(tbl, start_element)
---   local index = 0
---   local length = #tbl
---   for i, v in ipairs(tbl) do
---     if start_element == nil then
---       index = 0
---       break
---     elseif v == start_element then
---       print("找到起始元素的索引" .. v)
---       index = i
---       break
---     end
---   end
---   return index, length
--- end
---
--- function M.create_cyclic_iterator(tbl, start_element, direction)
---   local index, length = M.findMarkPos(tbl, start_element)
---
---   if direction == "next" then
---     index = index + 1
---   elseif direction == "prev" then
---     index = index - 1
---   end
---   if index > length then
---     index = 0
---   elseif index < 0 then
---     index = length
---   end
---
---   return tbl[index]
--- end
-
-function M.get_mark()
-  -- 获取所有标记
-  local marks = vim.fn.execute("marks")
-  local lines = vim.split(marks, "\n")
-  -- print("lines" .. vim.inspect(lines))
-  -- 收集所有大写标记
-  local markTable = {}
-  for i = 2, #lines do
-    local mark = vim.split(lines[i], "%s+")
-    if #mark >= 3 then
-      local isUpper = M.is_uppercase_mark(mark[2])
-      if isUpper then
-        table.insert(markTable, mark[2])
-      end
-    end
-  end
-  return markTable
+-- 跳转到指定标记
+local function jump_to_mark(mark)
+  vim.cmd("edit " .. mark.file)
+  vim.api.nvim_win_set_cursor(0, { mark.line, mark.col - 1 })
+  -- print(string.format("跳转到: %d at %s:%d:%d", mark.id, mark.file, mark.line, mark.col))
 end
 
-function M.next_mark(type)
-  local isExist, marks = M.check_mark_at_cursor()
-  if isExist then
-    lru:setIndexFormMark(marks[1])
+-- 跳转到下一个标记
+local function jump_to_next_mark()
+  if #named_marks == 0 then
+    print("No marks set")
+    return
   end
-  local mark
-  if type == 1 then
-    mark = lru:goNext()
-  else
-    mark = lru:goPrev()
-  end
-  if mark ~= nil then
-    print("访问" .. mark)
-    vim.cmd("normal! '" .. mark)
-  else
-    print("No next mark found")
-  end
+  current_mark_index = (current_mark_index % #named_marks) + 1
+  jump_to_mark(named_marks[current_mark_index])
 end
 
-function M.set_mark()
-  if self_next_mark > string.byte("Z") then
-    self_next_mark = string.byte("A")
+-- 跳转到上一个标记
+local function jump_to_prev_mark()
+  if #named_marks == 0 then
+    print("No marks set")
+    return
   end
-  local mark = string.char(self_next_mark)
-  local buf = vim.api.nvim_get_current_buf()
-  local pos = vim.api.nvim_win_get_cursor(0)
-
-  print('标记设置为"' .. mark .. '"')
-  vim.api.nvim_buf_set_mark(buf, mark, pos[1], pos[2], {})
-  lru:put(mark, mark)
-  lru:logState()
-  -- lru:restIndex()
-  -- viewer = lru:reverseIterator()
-  -- local _m = "WarningSign" .. mark
-  -- vim.fn.sign_define(_m, {
-  --   text = mark, -- 使用 Unicode 字符作为图标
-  --   texthl = "WarningMsg",
-  --   numhl = "WarningMsg",
-  -- })
-  -- vim.fn.sign_place(0, "BreakpointGroup", _m, buf, { lnum = pos[1] })
-  self_next_mark = self_next_mark + 1
+  current_mark_index = ((current_mark_index - 2 + #named_marks) % #named_marks) + 1
+  jump_to_mark(named_marks[current_mark_index])
 end
 
-function M.check_mark_at_cursor()
-  -- 获取当前光标位置
-  local cursor_pos = vim.api.nvim_win_get_cursor(0)
-  local cursor_line = cursor_pos[1]
-  -- 定义所有可能的标记
-  local marks = M.get_mark()
-  -- 检查每个标记
-  local found_marks = {}
-  for _, mark in ipairs(marks) do
-    local mark_pos = vim.api.nvim_buf_get_mark(0, mark)
-    if mark_pos[1] == cursor_line then
-      table.insert(found_marks, mark)
-    end
+-- 列出所有标记
+local function list_marks()
+  if #named_marks == 0 then
+    print("No marks set")
+    return
   end
+  local strmap = {}
+  for _, mark in ipairs(named_marks) do
+    table.insert(strmap, string.format("%d: %s:%d:%d", mark.id, mark.file, mark.line, mark.col))
+  end
+  utils.toggle_window({ strmap = strmap })
+end
 
-  -- 返回结果
-  if #found_marks > 0 then
-    return true, found_marks
-  else
-    return false, {}
+-- 删除当前标记
+local function delete_current_mark()
+  if #named_marks == 0 then
+    print("No marks to delete")
+    return
+  end
+  local deleted_mark = table.remove(named_marks, current_mark_index)
+  print(
+    string.format(
+      "Deleted mark: %d at %s:%d:%d",
+      deleted_mark.id,
+      deleted_mark.file,
+      deleted_mark.line,
+      deleted_mark.col
+    )
+  )
+  if current_mark_index > #named_marks then
+    current_mark_index = #named_marks
   end
 end
 
-vim.keymap.set("n", "mm", function()
-  local isExist, marks = M.check_mark_at_cursor()
-  if isExist then
-    print("当前光标标记已存在", marks[1])
-  else
-    M.set_mark()
-  end
-end, { noremap = true })
--- 设置快捷键映射
-vim.keymap.set("n", "mn", function()
-  M.next_mark(1)
-end, { noremap = true })
-
-vim.keymap.set("n", "mb", function()
-  M.next_mark(2)
-end, { noremap = true })
-
-function M.setup()
-  local tabl = M.get_mark()
-  for _, v in ipairs(tabl) do
-    lru:put(v, v)
+function M.save_marks()
+  local filePath = vim.fn.stdpath("data") .. "/" .. vim.fn.sha256(utils.get_project_branch_id()) .. ".json"
+  local file = io.open(filePath, "w")
+  if file then
+    file:write(vim.fn.json_encode(named_marks))
+    file:close()
   end
 end
 
-vim.keymap.set("n", "ml", function()
-  lru:logState()
-end, { noremap = true })
+function M.load_marks()
+  local filePath = vim.fn.stdpath("data") .. "/" .. vim.fn.sha256(utils.get_project_branch_id()) .. ".json"
+  local file = io.open(filePath, "r")
+  if file then
+    local content = file:read("*all")
+    file:close()
+    named_marks = vim.fn.json_decode(content)
+    current_mark_index = #named_marks > 0 and 1 or 0
+  end
+end
 
--- M.setup()
-
-vim.api.nvim_create_autocmd("BufReadPost", {
+-- 在设置和删除标记后保存
+vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
   callback = function()
-    M.setup()
+    M.save_marks()
   end,
 })
+
+M.load_marks()
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "GitBranchChanged",
+  callback = function()
+    -- print("切换分支")
+    M.load_marks()
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    local current_branch = vim.fn.system("git rev-parse --abbrev-ref HEAD 2>/dev/null"):gsub("\n", "")
+    if current_branch ~= "" and current_branch ~= vim.b.last_git_branch then
+      vim.b.last_git_branch = current_branch
+      vim.cmd("doautocmd User GitBranchChanged")
+    end
+  end,
+})
+
+-- 设置命令
+vim.api.nvim_create_user_command("MarkSet", set_named_mark, {})
+vim.api.nvim_create_user_command("MarkNext", jump_to_next_mark, {})
+vim.api.nvim_create_user_command("MarkPrev", jump_to_prev_mark, {})
+vim.api.nvim_create_user_command("MarkList", list_marks, {})
+vim.api.nvim_create_user_command("MarkDelete", delete_current_mark, {})
+
+-- 设置快捷键
+vim.api.nvim_set_keymap("n", "mm", ":MarkSet<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "mn", ":MarkNext<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "mb", ":MarkPrev<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "ml", ":MarkList<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "mc", ":MarkDelete<CR>", { noremap = true, silent = true })
 
 return {}
