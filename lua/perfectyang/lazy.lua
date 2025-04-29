@@ -17,7 +17,7 @@ require("lazy").setup({
   { import = "perfectyang.plugins.viewRegister" },
   { import = "perfectyang.custom.yankbank.init" },
   { import = "perfectyang.custom.tempnote.init" },
-  { import = "perfectyang.custom.bookmark.init" },
+  -- { import = "perfectyang.custom.bookmark.init" },
 }, {
 
   checker = {

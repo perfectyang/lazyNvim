@@ -49,5 +49,15 @@
     "prefix": "th",
     "body": ["hasAuthCode('$1')"],
     "description": "权限"
+  },
+  "db": {
+    "prefix": "db",
+    "body": ["onChange: debounce((val) => {}, 10),", ""],
+    "description": "db"
+  },
+  "lg": {
+    "prefix": "lg",
+    "body": ["console.log('$1')", ""],
+    "description": "自定义log"
   }
 }

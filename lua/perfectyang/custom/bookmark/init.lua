@@ -78,6 +78,7 @@ local function delete_current_mark()
   if current_mark_index > #named_marks then
     current_mark_index = #named_marks
   end
+  M.save_marks()
 end
 
 function M.save_marks()

@@ -39,6 +39,8 @@ keymap.set("n", "daf", "va{Vd")
 keymap.set("n", "yaf", "va{Vy")
 keymap.set("n", "yp", "Yp")
 keymap.set("n", "Q", ":q!<CR>")
+keymap.set("n", "D", "dd")
+keymap.set("n", "Y", "yy")
 
 -- 标记可以不同文件夹之前跳转
 local alp = {
@@ -75,9 +77,8 @@ local function getSetMark(list)
     keymap.set("n", "`" .. value, "`" .. string.upper(value))
   end
 end
--- getSetMark(alp)
+getSetMark(alp)
 -- Move Lines
-
 
 keymap.set("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
 keymap.set("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
