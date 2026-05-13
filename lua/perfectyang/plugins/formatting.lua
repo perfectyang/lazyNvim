@@ -6,25 +6,30 @@ return {
 
     conform.setup({
       formatters_by_ft = {
-        javascript = { "prettier" },
-        typescript = { "prettier" },
-        javascriptreact = { "prettier" },
-        typescriptreact = { "prettier" },
-        svelte = { "prettier" },
-        css = { "prettier" },
-        html = { "prettier" },
-        json = { "prettier" },
-        yaml = { "prettier" },
-        markdown = { "prettier" },
-        graphql = { "prettier" },
-        liquid = { "prettier" },
+        javascript = { "oxfmt", "oxlint" },
+        typescript = { "oxfmt", "oxlint" },
+        javascriptreact = { "oxfmt" },
+        typescriptreact = { "oxfmt" },
+        svelte = { "oxfmt", "oxlint" },
+        css = { "oxfmt", "oxlint" },
+        html = { "oxfmt", "oxlint" },
+        json = { "oxfmt", "oxlint" },
+        yaml = { "oxfmt", "oxlint" },
+        markdown = { "oxfmt", "oxlint" },
+        graphql = { "oxfmt", "oxlint" },
+        liquid = { "oxfmt", "oxlint" },
         lua = { "stylua" },
         python = { "isort", "black" },
+      },
+      formatters = {
+        oxlint = {
+          timeout = 2000,
+        },
       },
       format_on_save = {
         lsp_fallback = true,
         async = false,
-        timeout_ms = 1000,
+        timeout_ms = 500,
       },
     })
 

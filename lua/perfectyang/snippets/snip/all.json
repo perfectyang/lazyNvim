@@ -18,6 +18,11 @@
     "body": ["const $1 = () => {", "  ", "}", ""],
     "description": "箭头函数"
   },
+  "c": {
+    "prefix": "c",
+    "body": ["const $1 = ", ""],
+    "description": "定义常量"
+  },
   "fam": {
     "prefix": "fam",
     "body": ["const $1 = useMemoizedFn(() => {", "  ", "})", ""],

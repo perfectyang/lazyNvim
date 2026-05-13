@@ -17,7 +17,7 @@ end
 local function open_win()
   winid = vim.api.nvim_open_win(0, true, {
     relative = "editor",
-    width = math.floor(vim.o.columns * 0.8),
+    width = math.floor(vim.o.columns * 0.4),
     height = 1,
     row = 1,
     col = math.floor(vim.o.columns * 0.1),

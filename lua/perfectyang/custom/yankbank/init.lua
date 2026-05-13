@@ -1,3 +1,4 @@
+local floatWindow = require("plenary.window.float")
 local M = {}
 
 -- define global variables
@@ -13,7 +14,7 @@ local persistence = require("perfectyang.custom.yankbank.persistence")
 
 -- default plugin options
 local default_opts = {
-  max_entries = 100,
+  max_entries = 50,
   sep = "",
   focus_gain_poll = true,
   num_behavior = "jump",
@@ -55,6 +56,13 @@ local function show_yank_bank()
 
   -- open popup window
   buf_data.win_id = menu.open_window(buf_data)
+  -- buf_data.win_id = floatWindow.centered({
+  --   bufnr = buf_data.bufnr,
+  -- }).win_id
+  --
+  -- vim.api.nvim_buf_set_option(buf_data.bufnr, "modifiable", false)
+  -- vim.api.nvim_win_set_option(buf_data.win_id, "nu", true)
+
   state.floating.win = buf_data.win_id
 
   -- set popup keybinds
@@ -81,11 +89,21 @@ function M.setup(opts)
     show_yank_bank()
   end, { desc = "Show Recent Yanks" })
 end
+local function showCenter()
+  floatWindow.centered({})
+end
 
 M.setup({})
 
 vim.keymap.set("n", "<leader>l", show_yank_bank, { noremap = true })
+vim.keymap.set("n", "<leader>y", showCenter, { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>z", zoom, { noremap = true })
 vim.keymap.set("n", "<leader>db", "<cmd>YankBankClearDB<CR>", { noremap = true })
+
+-- local Path = require("plenary.path")
+-- local config_path = vim.fn.stdpath("data")
+-- local user_config = string.format("%s/harpoon.json", config_path)
+-- local str = vim.json.decode(Path:new(user_config):read())
+-- print(vim.inspect(str))
 
 return {}
