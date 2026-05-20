@@ -63,7 +63,7 @@ M.setup = function(conf)
 end
 
 local function print_lsp_error(lsp_call)
-  print("goto-preview: Error calling LSP" + lsp_call + ". The current language lsp might not support it.")
+  print("goto-preview: Error calling LSP " .. lsp_call .. ". The current language lsp might not support it.")
 end
 M.getEncoding = function()
   -- 获取当前缓冲区（编号0）的第一个LSP客户端
@@ -97,7 +97,7 @@ end
 ---        • dismiss_on_move boolean: Dismiss the floating window when moving the cursor.
 --- @see require("goto-preview").setup()
 M.lsp_request_type_definition = function(opts)
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, M.getEncoding())
   local lsp_call = "textDocument/typeDefinition"
   local success, _ = pcall(vim.lsp.buf_request, 0, lsp_call, params, lib.get_handler(lsp_call, opts))
   if not success then
@@ -111,7 +111,7 @@ end
 ---        • dismiss_on_move boolean: Dismiss the floating window when moving the cursor.
 --- @see require("goto-preview").setup()
 M.lsp_request_implementation = function(opts)
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, M.getEncoding())
   local lsp_call = "textDocument/implementation"
   local success, _ = pcall(vim.lsp.buf_request, 0, lsp_call, params, lib.get_handler(lsp_call, opts))
   if not success then
@@ -125,7 +125,7 @@ end
 ---        • dismiss_on_move boolean: Dismiss the floating window when moving the cursor.
 --- @see require("goto-preview").setup()
 M.lsp_request_declaration = function(opts)
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, M.getEncoding())
   local lsp_call = "textDocument/declaration"
   local success, _ = pcall(vim.lsp.buf_request, 0, lsp_call, params, lib.get_handler(lsp_call, opts))
   if not success then
@@ -134,7 +134,7 @@ M.lsp_request_declaration = function(opts)
 end
 
 M.lsp_request_references = function(opts)
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, M.getEncoding())
 
   lib.logger.debug("params pre manipulation", vim.inspect(params))
   if not params.context then
@@ -156,7 +156,9 @@ M.close_all_win = function(options)
 
   for _, win in pairs(windows) do
     local index = lib.tablefind(lib.windows, win)
-    table.remove(lib.windows, index)
+    if index then
+      table.remove(lib.windows, index)
+    end
 
     if options and options.skip_curr_window then
       if win ~= vim.api.nvim_get_current_win() then
@@ -173,26 +175,25 @@ local function get_active_window()
   local wins = vim.api.nvim_tabpage_list_wins(0)
   local active_win = vim.api.nvim_tabpage_get_win(0)
 
-  print("All windows in current tabpage:", vim.inspect(wins))
-  print("Active window ID:", active_win)
-
   -- 验证活动窗口是否在窗口列表中
   for _, win in ipairs(wins) do
     if win == active_win then
-      print("Active window found in the list")
-      return
+      return active_win
     end
   end
-  print("Active window not found in the list (this should never happen)")
+  return active_win
 end
 
 M.go_next_win = function()
   local win = get_active_window()
-  lib.go_next_win(win)
+  if win then
+    lib.go_next_win(win)
+  else
+    lib.go_next_win()
+  end
 end
 
 M.remove_win = lib.remove_win
-M.go_next_win = lib.go_next_win
 M.buffer_entered = lib.buffer_entered
 M.buffer_left = lib.buffer_left
 M.dismiss_preview = lib.dismiss_preview
