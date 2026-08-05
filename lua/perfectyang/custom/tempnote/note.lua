@@ -3,7 +3,13 @@ local M = {}
 local db = require("perfectyang.custom.tempnote.db")
 
 M.project_branch_buffers = {}
+M.buffer_project_branch_ids = {}
 M.float_win = nil
+M.is_clearing_notes = false
+
+function M.get_legacy_note_path(project_branch_id)
+  return vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
+end
 
 function M.get_project_root()
   local git_dir = vim.fn.system("git rev-parse --show-toplevel 2>/dev/null"):gsub("\n", "")
@@ -37,6 +43,7 @@ function M.get_project_branch_buffer()
     vim.api.nvim_buf_set_option(bufnr, "bufhidden", "hide")
 
     M.project_branch_buffers[project_branch_id] = bufnr
+    M.buffer_project_branch_ids[bufnr] = project_branch_id
 
     vim.api.nvim_create_autocmd("BufWriteCmd", {
       buffer = bufnr,
@@ -52,27 +59,31 @@ function M.get_project_branch_buffer()
 end
 
 function M.save_buffer_content(bufnr, project_branch_id)
+  if not project_branch_id or project_branch_id == "" then
+    return
+  end
+
   local content = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-
-  -- db.add_note(project_branch_id, table.concat(content, "\n"))
-
-  local file_path =
-    vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
-  vim.fn.mkdir(vim.fn.fnamemodify(file_path, ":h"), "p")
-  vim.fn.writefile(content, file_path)
+  db.add_note(project_branch_id, table.concat(content, "\n"))
   vim.api.nvim_buf_set_option(bufnr, "modified", false)
 end
 
 function M.load_buffer_content(bufnr, project_branch_id)
-  local file_path =
-    vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
-  if vim.fn.filereadable(file_path) == 1 then
-    local content = vim.fn.readfile(file_path)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, content)
+  local content = db.select_data(project_branch_id)
+
+  if content == "" then
+    local file_path = M.get_legacy_note_path(project_branch_id)
+    if vim.fn.filereadable(file_path) == 1 then
+      local legacy_content = vim.fn.readfile(file_path)
+      content = table.concat(legacy_content, "\n")
+      db.add_note(project_branch_id, content)
+    end
   end
-  -- local content = db.select_data(project_branch_id)
-  -- local map = {}
-  -- table.insert(map, content)
+
+  if content ~= "" then
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(content, "\n", { plain = true }))
+  end
+
   vim.api.nvim_buf_set_option(bufnr, "modified", false)
 end
 
@@ -109,8 +120,10 @@ function M.create_float_win(bufnr)
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(M.float_win),
     callback = function()
-      local project_branch_id = M.get_project_branch_id()
-      M.save_buffer_content(bufnr, project_branch_id)
+      if not M.is_clearing_notes then
+        local project_branch_id = M.get_project_branch_id()
+        M.save_buffer_content(bufnr, project_branch_id)
+      end
       M.float_win = nil
     end,
   })
@@ -120,7 +133,9 @@ function M.close_float_win()
   if M.float_win and vim.api.nvim_win_is_valid(M.float_win) then
     local bufnr = vim.api.nvim_win_get_buf(M.float_win)
     local project_branch_id = M.get_project_branch_id()
-    M.save_buffer_content(bufnr, project_branch_id)
+    if not M.is_clearing_notes then
+      M.save_buffer_content(bufnr, project_branch_id)
+    end
     vim.api.nvim_win_close(M.float_win, true)
     M.float_win = nil
   end
@@ -142,15 +157,46 @@ function M.cleanup_deleted_branches()
         vim.api.nvim_buf_delete(bufnr, { force = true })
       end
 
-      local file_path =
-        vim.fn.expand(vim.fn.stdpath("cache") .. "/git_notes/" .. vim.fn.sha256(project_branch_id) .. ".txt")
+      db.delete_note(project_branch_id)
+
+      local file_path = M.get_legacy_note_path(project_branch_id)
       if vim.fn.filereadable(file_path) == 1 then
         vim.fn.delete(file_path)
       end
 
       M.project_branch_buffers[project_branch_id] = nil
+      M.buffer_project_branch_ids[bufnr] = nil
     end
   end
+end
+
+function M.clear_notes()
+  M.is_clearing_notes = true
+  db.clear_notes()
+
+  if M.float_win and vim.api.nvim_win_is_valid(M.float_win) then
+    vim.api.nvim_win_close(M.float_win, true)
+  end
+
+  local buffers = {}
+  for project_branch_id, bufnr in pairs(M.project_branch_buffers) do
+    table.insert(buffers, { project_branch_id = project_branch_id, bufnr = bufnr })
+  end
+
+  for _, entry in ipairs(buffers) do
+    local project_branch_id = entry.project_branch_id
+    local bufnr = entry.bufnr
+
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_delete(bufnr, { force = true })
+    end
+
+    M.project_branch_buffers[project_branch_id] = nil
+    M.buffer_project_branch_ids[bufnr] = nil
+  end
+
+  M.float_win = nil
+  M.is_clearing_notes = false
 end
 
 function M.toggle_project_branch_notes()
@@ -169,7 +215,7 @@ vim.api.nvim_create_autocmd("User", {
     M.cleanup_deleted_branches()
     if M.float_win and vim.api.nvim_win_is_valid(M.float_win) then
       local old_bufnr = vim.api.nvim_win_get_buf(M.float_win)
-      local old_project_branch_id = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(old_bufnr), ":t:r")
+      local old_project_branch_id = M.buffer_project_branch_ids[old_bufnr]
       M.save_buffer_content(old_bufnr, old_project_branch_id)
 
       local new_bufnr = M.get_project_branch_buffer()

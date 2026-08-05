@@ -9,6 +9,23 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   pattern = "*",
 })
 
+-- 失焦回焦后关闭卡住的浮窗（如 dressing.nvim 的 code_action 弹窗）
+vim.api.nvim_create_autocmd("FocusGained", {
+  group = vim.api.nvim_create_augroup("CloseStuckPopup", { clear = true }),
+  callback = function()
+    for _, winid in ipairs(vim.api.nvim_list_wins()) do
+      local config = vim.api.nvim_win_get_config(winid)
+      if config.relative ~= "" then
+        local buf = vim.api.nvim_win_get_buf(winid)
+        local buftype = vim.bo[buf].buftype
+        if buftype == "nofile" then
+          pcall(vim.api.nvim_win_close, winid, true)
+        end
+      end
+    end
+  end,
+})
+
 -- 自动补全
 -- vim.o.autocomplete = true
 -- vim.api.nvim_create_autocmd("LspAttach", {

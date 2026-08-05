@@ -7,6 +7,13 @@ vim.api.nvim_create_user_command("GitNotes", function()
   git_buffers.toggle_project_branch_notes()
 end, {})
 
+vim.api.nvim_create_user_command("GitNotesClear", function(opts)
+  if opts.bang or vim.fn.confirm("Clear all GitNotes database entries?", "&Yes\n&No", 2) == 1 then
+    git_buffers.clear_notes()
+    vim.notify("GitNotes database cleared", vim.log.levels.INFO)
+  end
+end, { bang = true })
+
 vim.api.nvim_create_autocmd("BufEnter", {
   callback = function()
     local current_branch = vim.fn.system("git rev-parse --abbrev-ref HEAD 2>/dev/null"):gsub("\n", "")

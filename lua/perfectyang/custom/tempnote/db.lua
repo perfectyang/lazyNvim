@@ -1,36 +1,50 @@
 local M = {}
 
--- 1. 初始化一个 SQLite 数据库对象
-local db_path = vim.fn.expand("~/Downloads")
-
 local sqlite = require("sqlite")
 
-local db = sqlite({
-  uri = db_path .. "/pnotes.db",
-  notes = {
-    content = { "text" },
-    id = { "text", primary = true, unique = true },
-  },
-})
+local db
+local data
 
-local data = db.notes
+local function default_db_path()
+  local dir = vim.fn.stdpath("data") .. "/tempnote"
+  vim.fn.mkdir(dir, "p")
+  return dir .. "/pnotes.db"
+end
 
-function M.add_note(brand, content)
+local function open_db(uri)
+  db = sqlite({
+    uri = uri,
+    notes = {
+      id = { "text", primary = true, unique = true, required = true },
+      content = { "text", required = true },
+      updated_at = { "integer", required = true, default = 0 },
+    },
+  })
+  data = db.notes
+end
+
+function M.setup(uri)
+  open_db(vim.fn.expand(uri or default_db_path()))
+end
+
+M.setup()
+
+function M.add_note(id, content)
   db:with_open(function()
-    -- check if entry exists in db
-    -- local res = db:eval("SELECT * FROM notes WHERE id = :brand", { id = brand })
-    -- print(type(res))
-    -- -- if result is empty (eval returns boolean), proceed to insertion
-    -- if type(res) ~= "boolean" then
-    --   -- remove entry from db so it can be moved to first position
-    --   db:eval("DELETE FROM notes WHERE id = :brand", { id = brand })
-    -- end
-    -- 3. 插入一些数据
-    print("插入一些数据")
-    db:eval("INSERT INTO notes (id, content) VALUES (:id, :content)", {
-      id = brand,
-      content = content,
-    })
+    db:eval(
+      [[
+        INSERT INTO notes (id, content, updated_at)
+        VALUES (:id, :content, :updated_at)
+        ON CONFLICT(id) DO UPDATE SET
+          content = excluded.content,
+          updated_at = excluded.updated_at
+      ]],
+      {
+        id = id,
+        content = content,
+        updated_at = os.time(),
+      }
+    )
   end)
 end
 
@@ -38,11 +52,10 @@ function M.get_data()
   return data
 end
 
--- 获取指定brand的数据
-function M.select_data(brand)
+function M.select_data(id)
   local e = db:with_open(function()
     return db:select("notes", {
-      where = { id = brand },
+      where = { id = id },
       limit = 1,
     })[1]
   end)
@@ -52,6 +65,18 @@ function M.select_data(brand)
   else
     return ""
   end
+end
+
+function M.delete_note(id)
+  return db:with_open(function()
+    return db:eval("DELETE FROM notes WHERE id = :id", { id = id })
+  end)
+end
+
+function M.clear_notes()
+  return db:with_open(function()
+    return db:eval("DELETE FROM notes")
+  end)
 end
 
 return M

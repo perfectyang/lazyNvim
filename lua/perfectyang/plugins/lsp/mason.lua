@@ -82,10 +82,14 @@ return {
           "javascriptreact",
           "typescriptreact",
           "svelte",
+          "vue",
         },
       },
       svelte = {
         filetypes = { "svelte" },
+      },
+      vue_ls = {
+        filetypes = { "vue" },
       },
       lua_ls = {
         filetypes = { "lua" },
@@ -115,6 +119,7 @@ return {
           "javascriptreact",
           "typescriptreact",
           "svelte",
+          "vue",
         },
       },
       prismals = {
@@ -127,9 +132,44 @@ return {
         filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact" },
         root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
       },
+      vtsls = {
+        filetypes = { "vue" },
+        settings = {
+          vtsls = {
+            tsserver = {
+              globalPlugins = {
+                {
+                  name = "@vue/typescript-plugin",
+                  location = vim.fn.stdpath("data")
+                    .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+                  languages = { "vue" },
+                  configNamespace = "typescript",
+                },
+              },
+            },
+          },
+        },
+      },
     }
 
-    for server, opts in pairs(servers) do
+    local server_order = {
+      "bashls",
+      "html",
+      "cssls",
+      "tailwindcss",
+      "svelte",
+      "vtsls",
+      "vue_ls",
+      "lua_ls",
+      "graphql",
+      "emmet_ls",
+      "prismals",
+      "pyright",
+      "ts_ls",
+    }
+
+    for _, server in ipairs(server_order) do
+      local opts = servers[server]
       vim.lsp.config[server] = vim.tbl_deep_extend("force", {
         capabilities = capabilities,
         on_attach = on_attach,
@@ -144,12 +184,14 @@ return {
         "cssls",
         "tailwindcss",
         "svelte",
+        "vue_ls",
         "lua_ls",
         "graphql",
         "emmet_ls",
         "prismals",
         "pyright",
         "ts_ls",
+        "vtsls",
       },
       automatic_enable = false,
     })
@@ -157,9 +199,14 @@ return {
     mason_tool_installer.setup({
       ensure_installed = {
         "prettier",
+        "oxfmt",
+        "oxlint",
         "stylua",
         "eslint_d",
       },
+      run_on_start = true,
+      start_delay = 3000,
+      debounce_hours = 12,
     })
   end,
 }

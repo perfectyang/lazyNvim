@@ -130,6 +130,13 @@ function data.remove_match(text, reg_type)
   end)
 end
 
+function data:clear()
+  db:with_open(function()
+    db:delete("bank")
+    db:eval("VACUUM")
+  end)
+end
+
 --- pin entry in yankbank to prevent removal
 ---@param text string text to match and pin
 ---@param reg_type string reg_type corresponding to text
@@ -170,9 +177,10 @@ function M.setup()
   max_entries = YB_OPTS.max_entries
 
   vim.api.nvim_create_user_command("YankBankClearDB", function()
-    data:drop()
+    data:clear()
     YB_YANKS = {}
     YB_REG_TYPES = {}
+    YB_PINS = {}
   end, {})
 
   if YB_OPTS.debug == true then

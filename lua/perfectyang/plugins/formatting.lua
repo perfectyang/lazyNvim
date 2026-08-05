@@ -6,30 +6,26 @@ return {
 
     conform.setup({
       formatters_by_ft = {
-        javascript = { "oxfmt", "oxlint" },
-        typescript = { "oxfmt", "oxlint" },
+        javascript = { "oxfmt" },
+        typescript = { "oxfmt" },
         javascriptreact = { "oxfmt" },
         typescriptreact = { "oxfmt" },
-        svelte = { "oxfmt", "oxlint" },
-        css = { "oxfmt", "oxlint" },
-        html = { "oxfmt", "oxlint" },
-        json = { "oxfmt", "oxlint" },
-        yaml = { "oxfmt", "oxlint" },
-        markdown = { "oxfmt", "oxlint" },
-        graphql = { "oxfmt", "oxlint" },
-        liquid = { "oxfmt", "oxlint" },
+        svelte = { "oxfmt" },
+        vue = { "oxfmt" },
+        css = { "oxfmt" },
+        html = { "oxfmt" },
+        json = { "oxfmt" },
+        yaml = { "oxfmt" },
+        markdown = { "oxfmt" },
+        graphql = { "oxfmt" },
+        liquid = { "oxfmt" },
         lua = { "stylua" },
         python = { "isort", "black" },
-      },
-      formatters = {
-        oxlint = {
-          timeout = 2000,
-        },
       },
       format_on_save = {
         lsp_fallback = true,
         async = false,
-        timeout_ms = 500,
+        timeout_ms = 2000,
       },
     })
 
@@ -37,7 +33,7 @@ return {
       conform.format({
         lsp_fallback = true,
         async = false,
-        timeout_ms = 1000,
+        timeout_ms = 2000,
       })
     end, { desc = "Format file or range (in visual mode)" })
   end,

@@ -124,28 +124,6 @@ keymap.set("n", "<leader>q", ":bp<bar>sp<bar>bn<bar>bd<CR>", opts)
 -- 清除所有buffer页
 keymap.set("n", "<leader>c", ":bufdo bd<CR>", opts)
 
-local ms = {
-  "'",
-  '"',
-  "}",
-  "{",
-  ")",
-  "(",
-}
-
-for _, value in ipairs(ms) do
-  keymap.set("n", value, function()
-    vim.cmd("normal! yiw")
-    local word = vim.fn.getreg('"')
-    if value == "}" or value == "{" then
-      vim.cmd("normal! ciw{" .. word .. "}")
-    elseif value == "(" or value == ")" then
-      vim.cmd("normal! ciw(" .. word .. ")")
-    else
-      vim.cmd("normal! ciw" .. value .. word .. value)
-    end
-  end, {})
-end
 -- console.log("end",end)
 -- keymap.set("n", "<leader>sv", function()
 --   local width = math.floor(vim.o.columns * 1.4) -- 计算总宽度的 40%
@@ -160,13 +138,58 @@ vim.keymap.set("n", "<leader>p", function()
   vim.api.nvim_put({ content }, "c", false, true)
 end, {})
 
-keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", {
+keymap.set("n", "gd", vim.lsp.buf.definition, {
   noremap = true,
   silent = true,
-}) -- see definition and make edits in window
+})
+
+-- see definition and make edits in window
 keymap.set("n", "gh", vim.lsp.buf.code_action, {
   noremap = true,
   silent = true,
 }) -- see available code action_
 
-keymap.set("n", "gt", vim.diagnostic.open_float)
+-- keymap.set("n", "gt", vim.diagnostic.open_float)
+
+local function logic()
+  local ms = {
+    "'",
+    '"',
+    "}",
+    "{",
+    ")",
+    "(",
+  }
+  for _, value in ipairs(ms) do
+    keymap.set("n", value, function()
+      vim.cmd("normal! yiw")
+      local word = vim.fn.getreg('"')
+      if value == "}" or value == "{" then
+        vim.cmd("normal! ciw{" .. word .. "}")
+      elseif value == "(" or value == ")" then
+        vim.cmd("normal! ciw(" .. word .. ")")
+      else
+        vim.cmd("normal! ciw" .. value .. word .. value)
+      end
+    end, {})
+  end
+end
+
+logic()
+
+-- function surround(start, close)
+--   vim.cmd("normal! yiw")
+--   local word = vim.fn.getreg('"')
+--   local command = string.format("ciw%s%s%s", start, word, close)
+--   vim.cmd("normal! " .. command)
+-- end
+--
+-- function event(start, close, keymap)
+--   vim.keymap.set("n", keymap, function()
+--     surround(start, close)
+--   end, { desc = "Surround " .. start .. close })
+-- end
+--
+-- event("(", ")", "()")
+-- event("{", "}", "{}")
+-- event("[", "]", "[]")

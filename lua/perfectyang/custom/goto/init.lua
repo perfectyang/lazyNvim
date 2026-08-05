@@ -122,6 +122,7 @@ local function get_method_clients(bufnr, method)
       javascript = { ts_ls = 1, vtsls = 1, typescript_tools = 1, denols = 2 },
       typescriptreact = { ts_ls = 1, vtsls = 1, typescript_tools = 1, denols = 2 },
       javascriptreact = { ts_ls = 1, vtsls = 1, typescript_tools = 1, denols = 2 },
+      vue = { vtsls = 1, vue_ls = 2, ts_ls = 3, typescript_tools = 3 },
     }
     local filetype_priority = priority[filetype] or {}
     local a_name = a.name or ""
