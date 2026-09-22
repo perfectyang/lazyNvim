@@ -122,7 +122,7 @@ keymap.set("n", "<TAB>", ":bnext<CR>", opts)
 keymap.set("n", "<S-TAB>", ":bprevious<CR>", opts)
 keymap.set("n", "<leader>q", ":bp<bar>sp<bar>bn<bar>bd<CR>", opts)
 -- 清除所有buffer页
-keymap.set("n", "<leader>c", ":bufdo bd<CR>", opts)
+keymap.set("n", "<leader>c", "<cmd>silent! %bd|e#|bd#<CR>", opts)
 
 -- console.log("end",end)
 -- keymap.set("n", "<leader>sv", function()
@@ -138,9 +138,22 @@ vim.keymap.set("n", "<leader>p", function()
   vim.api.nvim_put({ content }, "c", false, true)
 end, {})
 
-keymap.set("n", "gd", vim.lsp.buf.definition, {
+local function goto_definition()
+  vim.lsp.buf.definition({
+    on_list = function(options)
+      -- Neovim 0.12 opens the quickfix window when the LSP returns multiple
+      -- definitions. Keep the locations for :cnext/:cprev, but jump directly
+      -- to the first definition instead.
+      vim.fn.setqflist({}, " ", options)
+      vim.cmd("cfirst")
+    end,
+  })
+end
+
+keymap.set("n", "gd", goto_definition, {
   noremap = true,
   silent = true,
+  desc = "Go to definition",
 })
 
 -- see definition and make edits in window
